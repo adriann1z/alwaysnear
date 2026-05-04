@@ -1,0 +1,24 @@
+{
+  "name": "always-near",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@10.9.3",
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "web:dev": "npm --workspace @always-near/web run dev",
+    "web:build": "npm --workspace @always-near/web run build",
+    "api:dev": "npm --workspace @always-near/api run dev",
+    "api:migrate": "npm --workspace @always-near/api run migrate"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  }
+}

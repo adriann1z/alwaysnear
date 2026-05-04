@@ -1,0 +1,12 @@
+{
+  "name": "@always-near/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000",
+    "build": "python -m compileall app",
+    "lint": "python -m compileall app",
+    "test": "pytest",
+    "migrate": "alembic upgrade head"
+  }
+}
