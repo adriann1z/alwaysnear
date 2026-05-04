@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     elevenlabs_model_id: str = "eleven_multilingual_v2"
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o"
+    heygen_liveavatar_api_key: str | None = None
+    heygen_liveavatar_base_url: str = "https://api.heygen.com"
+    heygen_liveavatar_enabled: bool = False
 
     @field_validator("backend_cors_origins", mode="before")
     @classmethod

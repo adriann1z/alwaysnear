@@ -18,6 +18,11 @@ class AvatarResponse(BaseModel):
     approved_at: datetime | None
     deleted_at: datetime | None
     status: str
+    liveavatar_avatar_id: str | None = None
+    liveavatar_status: str = "not_configured"
+    liveavatar_session_id: str | None = None
+    liveavatar_embed_url: str | None = None
+    liveavatar_last_started_at: datetime | None = None
     created_at: datetime
 
 

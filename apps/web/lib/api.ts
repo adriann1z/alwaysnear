@@ -12,6 +12,9 @@ import type {
   ConversationStartResponse,
   ConversationSummary,
   HelperProfile,
+  LiveAvatarConfigureResponse,
+  LiveAvatarSession,
+  LiveAvatarSpeakResponse,
   MeResponse,
   ParentProfile,
   TokenResponse,
@@ -216,6 +219,22 @@ export const api = {
         method: "DELETE",
         body: JSON.stringify({ confirmation_phrase })
       })
+  },
+  liveAvatar: {
+    configure: (avatar_id: string) =>
+      apiPost<LiveAvatarConfigureResponse>("/liveavatar/configure", { avatar_id }),
+    startSession: () => apiPost<LiveAvatarSession>("/liveavatar/session/start"),
+    stopSession: (session_id?: string | null) =>
+      apiPost<{ stopped: boolean }>("/liveavatar/session/stop", { session_id }),
+    speak: (session_id: string, audio: Blob, contentType = "audio/wav") => {
+      const formData = new FormData();
+      const payload = audio.type ? audio : new Blob([audio], { type: contentType });
+      formData.append("audio", payload, "response-audio.wav");
+      return apiPost<LiveAvatarSpeakResponse>(
+        `/liveavatar/session/speak?session_id=${encodeURIComponent(session_id)}`,
+        formData
+      );
+    }
   },
   admin: {
     alerts: (params: {

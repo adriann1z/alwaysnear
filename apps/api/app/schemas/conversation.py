@@ -42,6 +42,10 @@ class ConversationMessageResponse(BaseModel):
     conversation_id: UUID
     response_text: str
     audio_url: str | None = None
+    audio_content_type: str | None = None
+    liveavatar_enabled: bool = False
+    liveavatar_session_required: bool = False
+    liveavatar_audio_stream_url: str | None = None
     risk_level: str
     risk_reason: str
     trigger_parent_alert: bool

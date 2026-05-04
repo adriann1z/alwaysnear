@@ -36,6 +36,10 @@ export type ConversationMessageResponse = {
   conversation_id: string;
   response_text: string;
   audio_url?: string | null;
+  audio_content_type?: string | null;
+  liveavatar_enabled: boolean;
+  liveavatar_session_required: boolean;
+  liveavatar_audio_stream_url?: string | null;
   risk_level: string;
   risk_reason: string;
   trigger_parent_alert: boolean;
@@ -109,6 +113,8 @@ export type AvatarResponse = {
   status: string;
   original_image_key?: string | null;
   approved_for_child_use?: boolean;
+  liveavatar_avatar_id?: string | null;
+  liveavatar_status?: string;
 };
 
 export type VoiceResponse = {
@@ -152,4 +158,23 @@ export type AdminSystemHealth = {
   status: string;
   uptime_seconds: number;
   database: string;
+};
+
+export type LiveAvatarSession = {
+  session_id: string;
+  embed_url?: string | null;
+  sdk_token?: string | null;
+  expires_at?: string | null;
+  mock: boolean;
+};
+
+export type LiveAvatarConfigureResponse = {
+  avatar_id: string;
+  status: string;
+};
+
+export type LiveAvatarSpeakResponse = {
+  accepted: boolean;
+  mode: string;
+  message: string;
 };

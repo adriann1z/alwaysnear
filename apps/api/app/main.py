@@ -16,6 +16,7 @@ from app.api.routes import (
     conversation,
     data_rights,
     helper_profiles,
+    liveavatar,
     parent,
     voice,
 )
@@ -56,3 +57,4 @@ app.include_router(comfort_modes.router)
 app.include_router(alerts.router)
 app.include_router(admin.router)
 app.include_router(data_rights.router)
+app.include_router(liveavatar.router)

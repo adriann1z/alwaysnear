@@ -4,10 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 
-import SpeakingAvatar from "@/components/avatar/SpeakingAvatar";
+import LiveAvatarPlayer from "@/components/avatar/LiveAvatarPlayer";
 import ChildModeShell, { getHelperLabel } from "@/components/child/ChildModeShell";
 import VoiceRecorder from "@/components/voice/VoiceRecorder";
 import { api } from "@/lib/api";
+import {
+  playAudioThroughLiveAvatar,
+  startLiveAvatarSession,
+  stopLiveAvatarSession
+} from "@/lib/liveavatar";
+import type { LiveAvatarSession } from "@/lib/types";
 
 type ConversationMessage = {
   response_text: string;
@@ -24,6 +30,7 @@ export default function ChildTalkPage() {
   const [status, setStatus] = useState("Getting ready...");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [avatarSession, setAvatarSession] = useState<LiveAvatarSession | null>(null);
   const initialized = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const helperLabel = typeof window !== "undefined" ? getHelperLabel() : "Mum's Always Near helper";
@@ -52,17 +59,33 @@ export default function ChildTalkPage() {
       }, false);
     },
     onMutate: () => setStatus("Helper is thinking..."),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.use_emergency_flow) {
+        await stopLiveAvatarSession(avatarSession);
+        setAvatarSession(null);
         router.push("/child/grown-up");
         return;
       }
       setMessage(data.response_text);
       setAudioSrc(data.audio_url ?? null);
       if (data.audio_url) {
+        let renderedByAvatar = false;
+        if (data.liveavatar_enabled) {
+          const session = avatarSession ?? (await startLiveAvatarSession());
+          setAvatarSession(session);
+          renderedByAvatar = await playAudioThroughLiveAvatar(
+            session,
+            data.liveavatar_audio_stream_url ?? data.audio_url
+          );
+        }
         setIsSpeaking(true);
         setStatus("Helper is speaking...");
-        window.setTimeout(() => setIsSpeaking(false), 2500);
+        window.setTimeout(() => {
+          setIsSpeaking(false);
+          if (!renderedByAvatar) {
+            setStatus("Helper is here.");
+          }
+        }, 2500);
       } else {
         setStatus("Helper is here.");
       }
@@ -82,6 +105,12 @@ export default function ChildTalkPage() {
     }
   }, [sendMessage]);
 
+  useEffect(() => {
+    return () => {
+      void stopLiveAvatarSession(avatarSession);
+    };
+  }, [avatarSession]);
+
   function replayAudio() {
     if (audioSrc && audioRef.current) {
       setIsSpeaking(true);
@@ -100,7 +129,13 @@ export default function ChildTalkPage() {
   return (
     <ChildModeShell>
       <section className="space-y-6 text-center">
-        <SpeakingAvatar helperLabel={helperLabel} isSpeaking={isSpeaking} audioSrc={audioSrc} />
+        <LiveAvatarPlayer
+          helperLabel={helperLabel}
+          session={avatarSession}
+          audioUrl={audioSrc}
+          isSpeaking={isSpeaking}
+          onError={() => setAvatarSession(null)}
+        />
         <div className="rounded-[2rem] bg-white p-6 text-2xl font-bold leading-snug shadow-soft">
           {message}
         </div>

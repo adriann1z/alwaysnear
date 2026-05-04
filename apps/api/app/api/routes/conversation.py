@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, get_db, require_parent
 from app.core.config import settings
 from app.models.alerts import Alert
+from app.models.avatars import Avatar
 from app.models.children import Child
 from app.models.conversations import Conversation, Message
 from app.models.helper_profiles import HelperProfile
@@ -128,6 +129,10 @@ async def send_message(
             conversation_id=conversation.id,
             response_text=response_text,
             audio_url=None,
+            audio_content_type=None,
+            liveavatar_enabled=False,
+            liveavatar_session_required=False,
+            liveavatar_audio_stream_url=None,
             risk_level=risk.risk_level,
             risk_reason=risk.risk_reason,
             trigger_parent_alert=True,
@@ -173,6 +178,11 @@ async def send_message(
         helper_profile=helper_profile,
         text=response_text,
     )
+    liveavatar_enabled = await should_offer_liveavatar(
+        db=db,
+        parent=parent,
+        audio_url=audio_url,
+    )
     assistant_message = Message(
         conversation_id=conversation.id,
         sender_role="assistant",
@@ -196,11 +206,34 @@ async def send_message(
         conversation_id=conversation.id,
         response_text=response_text,
         audio_url=audio_url,
+        audio_content_type="audio/wav" if audio_url else None,
+        liveavatar_enabled=liveavatar_enabled,
+        liveavatar_session_required=liveavatar_enabled,
+        liveavatar_audio_stream_url=audio_url if liveavatar_enabled else None,
         risk_level=risk.risk_level,
         risk_reason=risk.risk_reason,
         trigger_parent_alert=risk.trigger_parent_alert,
         use_emergency_flow=False,
     )
+
+
+async def should_offer_liveavatar(
+    *,
+    db: AsyncSession,
+    parent: Parent,
+    audio_url: str | None,
+) -> bool:
+    if not settings.heygen_liveavatar_enabled or not audio_url:
+        return False
+    result = await db.execute(
+        select(Avatar).where(
+            Avatar.parent_id == parent.id,
+            Avatar.approved_for_child_use.is_(True),
+            Avatar.deleted_at.is_(None),
+            Avatar.liveavatar_avatar_id.is_not(None),
+        )
+    )
+    return result.scalars().first() is not None
 
 
 async def create_conversation_alert(

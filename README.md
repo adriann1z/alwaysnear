@@ -20,7 +20,7 @@ Required local variables:
 DATABASE_URL=sqlite+aiosqlite:///./always_near.db
 NEXT_PUBLIC_API_URL=http://localhost:8000
 JWT_SECRET=replace-with-a-long-random-secret
-BACKEND_CORS_ORIGINS=http://localhost:3000
+BACKEND_CORS_ORIGINS=["http://localhost:3000"]
 ```
 
 Provider defaults use local mocks:
@@ -38,6 +38,7 @@ Production provider options:
 - Storage: set `STORAGE_PROVIDER=s3` or `r2`, plus bucket, region, endpoint, access key, and secret key.
 - Voice: set `VOICE_PROVIDER=elevenlabs`, `ELEVENLABS_API_KEY`, and optionally `ELEVENLABS_MODEL_ID`.
 - Safety/comfort generation: set `OPENAI_API_KEY` and optionally `OPENAI_MODEL`. Without an OpenAI key, deterministic test-friendly fallbacks are used.
+- LiveAvatar rendering: set `HEYGEN_LIVEAVATAR_ENABLED=true`, `HEYGEN_LIVEAVATAR_API_KEY`, and `HEYGEN_LIVEAVATAR_BASE_URL` after creating an approved LiveAvatar in the LiveAvatar platform. The frontend flag is `NEXT_PUBLIC_LIVEAVATAR_ENABLED=true`.
 
 Do not hardcode secrets in source files. Keep API keys and JWT secrets in environment variables.
 
@@ -133,5 +134,6 @@ Exports omit password hashes, raw files, signed URLs, and storage keys. Voice an
 - Local providers are mocks intended for development and tests.
 - Production voice/avatar providers require real credentials and provider review.
 - Avatar animation is a simple frontend presentation, not real-time lip sync.
+- HeyGen LiveAvatar support is isolated behind provider adapters. Local development uses mock behavior unless LiveAvatar credentials and flags are configured.
 - Token revocation is represented by account deactivation; a dedicated token denylist is not implemented.
 - Notifications are recorded as alerts but real push/email delivery is not implemented.

@@ -37,6 +37,15 @@ class Avatar(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     signed_urls_revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="draft")
+    liveavatar_avatar_id: Mapped[str | None] = mapped_column(String(255))
+    liveavatar_status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="not_configured",
+    )
+    liveavatar_session_id: Mapped[str | None] = mapped_column(String(255))
+    liveavatar_embed_url: Mapped[str | None] = mapped_column(Text)
+    liveavatar_last_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     helper_profile: Mapped["HelperProfile"] = relationship(back_populates="avatar")
     parent: Mapped["Parent | None"] = relationship()

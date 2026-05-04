@@ -247,6 +247,8 @@ def avatar_export(avatar: Avatar) -> dict:
         "deleted_at": avatar.deleted_at.isoformat() if avatar.deleted_at else None,
         "status": avatar.status,
         "has_original_image": avatar.original_image_key is not None,
+        "liveavatar_configured": avatar.liveavatar_avatar_id is not None,
+        "liveavatar_status": avatar.liveavatar_status,
     }
 
 

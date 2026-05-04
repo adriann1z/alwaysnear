@@ -49,6 +49,7 @@ function HelperSetupContent() {
   const [voiceId, setVoiceId] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [helperProfileId, setHelperProfileId] = useState<string | null>(null);
+  const [liveAvatarId, setLiveAvatarId] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const childId = typeof window !== "undefined" ? window.localStorage.getItem("always-near-child-id") : null;
   const selectedLabel = label === "custom" ? customLabel : label;
@@ -124,6 +125,9 @@ function HelperSetupContent() {
         helperProfileId || window.localStorage.getItem("always-near-helper-profile-id") || ""
       )
   });
+  const configureLiveAvatar = useMutation({
+    mutationFn: () => api.liveAvatar.configure(liveAvatarId)
+  });
 
   const steps = useMemo(
     () => [
@@ -135,6 +139,7 @@ function HelperSetupContent() {
       "Consent Recording",
       "Sample Recording",
       "Voice Preview",
+      "Connect LiveAvatar",
       "Final Review"
     ],
     []
@@ -353,6 +358,41 @@ function HelperSetupContent() {
       )}
 
       {step === 8 && (
+        <Card>
+          <h2 className="text-2xl font-bold">Connect LiveAvatar</h2>
+          <p className="mt-2 text-sm leading-6 text-ink/70">
+            Create your LiveAvatar in the LiveAvatar platform, then paste the approved avatar ID
+            here. Always Near still handles the child message, safety checks, comfort text, and
+            voice audio before avatar rendering.
+          </p>
+          <label className="mt-5 block text-sm font-semibold">
+            LiveAvatar Avatar ID
+            <TextInput
+              className="mt-2"
+              value={liveAvatarId}
+              onChange={(event) => setLiveAvatarId(event.target.value)}
+              placeholder="Paste approved avatar ID"
+            />
+          </label>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <SecondaryButton onClick={() => setStep(9)}>Skip for now</SecondaryButton>
+            <PrimaryButton
+              disabled={!liveAvatarId.trim() || configureLiveAvatar.isPending}
+              onClick={async () => {
+                await configureLiveAvatar.mutateAsync();
+                setStep(9);
+              }}
+            >
+              Save LiveAvatar ID
+            </PrimaryButton>
+          </div>
+          {configureLiveAvatar.isError && (
+            <p className="mt-3 text-sm text-emergency">LiveAvatar ID could not be saved yet.</p>
+          )}
+        </Card>
+      )}
+
+      {step === 9 && (
         <Card>
           <div className="flex items-start gap-4">
             <CheckCircle2 className="h-8 w-8 text-emerald-700" />
